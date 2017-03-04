@@ -1,0 +1,31 @@
+{
+  "name": "odd-api-client-node",
+  "version": "0.0.0",
+  "description": "An Odd Networks API client in Node.js",
+  "author": "Odd Networks, Inc.",
+  "license": "MIT",
+  "scripts": {
+    "test": "xo"
+  },
+  "dependencies": {
+    "yargs": "~7.0.0"
+  },
+  "devDependencies": {
+    "xo": "~0.16.0"
+  },
+  "xo": {
+    "esnext": true,
+    "envs": [
+      "node"
+    ],
+    "rules": {
+      "no-use-extend-native/no-use-extend-native": 0
+    }
+  },
+  "keywords": [
+    "Odd",
+    "Networks",
+    "API",
+    "client"
+  ]
+}
