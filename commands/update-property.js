@@ -26,6 +26,18 @@ exports.main = function updateProperty(app, args) {
 	let account = null;
 	let channel = null;
 
+	function maybeValidationError(file) {
+		return function (err) {
+			if (err.code) {
+				err.errors.forEach(err => {
+					log.error(`Validation error in ${file} : ${err.detail} at ${err.source.pointer}`);
+				});
+			}
+
+			return Promise.reject(err);
+		};
+	}
+
 	return Promise.resolve(null)
 		// Establish all the users
 		.then(() => {
@@ -125,6 +137,24 @@ exports.main = function updateProperty(app, args) {
 					log.info(`channel ${channel.id} setup and updated`);
 					return null;
 				});
+		})
+		// Push the jobs.
+		.then(() => {
+			const dir = source.append('job');
+
+			if (!dir.isDirectory()) {
+				log.info(`No jobs to push`);
+				return null;
+			}
+
+			return listJsonDirectory(dir).reduce((promise, file) => {
+				return promise.then(() => {
+					return readJsonFile(file).then(resource => {
+						return createOrUpdateResource(client, channel.id, resource)
+							.catch(maybeValidationError(file));
+					});
+				});
+			}, Promise.resolve(null));
 		});
 };
 

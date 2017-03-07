@@ -50,10 +50,24 @@ exports.main = function () {
 		process.exit(1);
 	}
 
+	function reportError(err) {
+		switch (err.code) {
+			case 'VALIDATION_ERROR':
+				err.errors.forEach(err => {
+					app.log.error(`Validation Error: ${err.detail}`);
+				});
+				break;
+			default:
+				return Promise.reject(err);
+		}
+
+		return null;
+	}
+
 	switch (command) {
 		case 'update-property':
 			if (argv.source) {
-				execUpdateProperty(app, {source: argv.source});
+				execUpdateProperty(app, {source: argv.source}).catch(reportError);
 			} else {
 				printErrorAndExit('A source path is required');
 			}
