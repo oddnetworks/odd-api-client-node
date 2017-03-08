@@ -9,6 +9,7 @@ const loginUser = require('../lib/login-user');
 const createOrUpdateResource = require('../lib/create-or-update-resource');
 
 const listJsonDirectory = lib.listJsonDirectory;
+const recurseJsonDirectory = lib.recurseJsonDirectory;
 const readJsonFile = lib.readJsonFile;
 
 // Params:
@@ -153,6 +154,68 @@ exports.main = function updateProperty(app, args) {
 						return createOrUpdateResource(client, channel.id, resource)
 							.catch(maybeValidationError(file));
 					});
+				});
+			}, Promise.resolve(null)).then(() => {
+				log.info(`All jobs have been pushed`);
+				return null;
+			});
+		})
+		// Create or update all the content items
+		.then(() => {
+			const dir = source.append('content');
+
+			if (!dir.isDirectory()) {
+				log.info(`No content to update`);
+				return null;
+			}
+
+			const files = recurseJsonDirectory(dir);
+
+			function updateResource(file) {
+				log.info(`Reading file ${file}`);
+				return readJsonFile(file).then(resource => {
+					delete resource.channel;
+					const relationships = resource.relationships;
+
+					if (resource.type === 'view' && relationships) {
+						// API service view objects don't have relationships like Oddworks objects
+						delete resource.relationships;
+
+						resource.content = Object.keys(relationships).reduce((content, key) => {
+							const data = relationships[key].data;
+							content[key] = Array.isArray(data) ? data : [data];
+							return content;
+						}, {});
+					} else if (resource.type === 'collection' && relationships) {
+						// API service collection objects don't have relationships like Oddworks objects
+						delete resource.relationships;
+
+						resource.children = Object.keys(relationships).reduce((content, key) => {
+							const data = relationships[key].data;
+							content[key] = Array.isArray(data) ? data : [data];
+							return content;
+						}, {});
+					} else if (resource.type === 'platform' && resource.platformType) {
+						resource.title = resource.platformType;
+					}
+
+					if (resource.relationships) {
+						resource.relationships.channel = {data: {id: channel.id, type: 'channel'}};
+					} else {
+						resource.channel = channel.id;
+					}
+
+					return createOrUpdateResource(client, channel.id, resource)
+						.then(data => {
+							log.info(`Updated resource ${data.type} ${data.id}`);
+						})
+						.catch(maybeValidationError(file));
+				});
+			}
+
+			return files.reduce((promise, file) => {
+				return promise.then(() => {
+					return updateResource(file);
 				});
 			}, Promise.resolve(null));
 		});
