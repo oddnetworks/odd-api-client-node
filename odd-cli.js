@@ -4,6 +4,7 @@
 const winston = require('winston');
 const yargs = require('yargs');
 const Application = require('./lib/application');
+const apiToken = require('./commands/api-token');
 const updateProperty = require('./commands/update-property');
 
 exports.main = function () {
@@ -23,6 +24,21 @@ exports.main = function () {
 	});
 
 	const parser = yargs
+		.command(
+			'api-token',
+			'Generate an API token for a user', {
+				username: {
+					describe: 'The username to own the token',
+					demand: true,
+					alias: 'u'
+				},
+				password: {
+					describe: 'The the password for the user',
+					demand: true,
+					alias: 'p'
+				}
+			}
+		)
 		.command(
 			'update-property',
 			'Create or update a property using a source directory', {
@@ -65,6 +81,15 @@ exports.main = function () {
 	}
 
 	switch (command) {
+		case 'api-token':
+			if (!argv.username) {
+				printErrorAndExit('A username is required');
+			} else if (argv.password) {
+				execApiToken(app, argv).catch(reportError);
+			} else {
+				printErrorAndExit('A password is required');
+			}
+			break;
 		case 'update-property':
 			if (argv.source) {
 				execUpdateProperty(app, {source: argv.source}).catch(reportError);
@@ -77,6 +102,12 @@ exports.main = function () {
 			parser.showHelp();
 	}
 };
+
+function execApiToken(app, args) {
+	return apiToken.main(app, args).then(jwt => {
+		console.log(jwt.token);
+	});
+}
 
 function execUpdateProperty(app, args) {
 	return updateProperty.main(app, args);

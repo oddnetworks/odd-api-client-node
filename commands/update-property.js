@@ -28,7 +28,7 @@ exports.main = function updateProperty(app, args) {
 
 	function maybeValidationError(file) {
 		return function (err) {
-			if (err.code) {
+			if (err.code === 'VALIDATION_ERROR') {
 				err.errors.forEach(err => {
 					log.error(`Validation error in ${file} : ${err.detail} at ${err.source.pointer}`);
 				});
