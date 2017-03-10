@@ -195,8 +195,11 @@ exports.main = function updateProperty(app, args) {
 							content[key] = Array.isArray(data) ? data : [data];
 							return content;
 						}, {});
-					} else if (resource.type === 'platform' && resource.platformType) {
-						resource.title = resource.platformType;
+					} else if (resource.type === 'platform') {
+						if (resource.platformType) {
+							resource.title = resource.platformType;
+						}
+						resource.id = `${channel.id}-${resource.title}-${resource.category}`.toLowerCase();
 					}
 
 					if (resource.relationships) {
