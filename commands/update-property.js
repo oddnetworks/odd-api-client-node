@@ -8,9 +8,11 @@ const HttpClient = require('../lib/http-client');
 const loginUser = require('../lib/login-user');
 const createOrUpdateResource = require('../lib/create-or-update-resource');
 
+const toJsonApiResource = lib.toJsonApiResource;
 const listJsonDirectory = lib.listJsonDirectory;
 const recurseJsonDirectory = lib.recurseJsonDirectory;
 const readJsonFile = lib.readJsonFile;
+const slugify = lib.slugify;
 
 // Params:
 // - app: The Application Object
@@ -122,6 +124,9 @@ exports.main = function updateProperty(app, args) {
 
 			return readJsonFile(files[0])
 				.then(resource => {
+					// Set the ID
+					resource.id = slugify(resource.title);
+
 					// Add the relationships.
 					const relationships = resource.relationships || {};
 					relationships.account = {id: account.id, type: 'account'};
@@ -131,7 +136,7 @@ exports.main = function updateProperty(app, args) {
 					const members = resource.members || [];
 					resource.members = members.concat(memberIds);
 
-					return createOrUpdateResource(client, null, resource);
+					return createOrUpdateChannel(log, client, resource);
 				})
 				.then(data => {
 					channel = data;
@@ -245,4 +250,42 @@ function setupUser(log, client, userData) {
 
 		throw new Error(`Unexpected login response: ${res}`);
 	});
+}
+
+function createOrUpdateChannel(log, client, channelData) {
+	const data = toJsonApiResource(channelData);
+
+	return Promise.resolve(null)
+		.then(() => {
+			return client.get(`/channels/${data.id}`).then(result => {
+				const statusCode = result.res.statusCode;
+				if (statusCode === 404) {
+					return client.post(`/channels`, {data});
+				} else if (statusCode === 200) {
+					return client.patch(`/channels/${data.id}`, {data});
+				}
+
+				return result;
+			});
+		})
+		.then(result => {
+			const statusCode = result.res.statusCode;
+			const body = result.body;
+
+			if (statusCode === 201 || statusCode === 200 || statusCode === 204) {
+				return body.data;
+			}
+
+			if (statusCode === 422) {
+				const req = result.req;
+				const error = new Error(`Validation errors from ${req.method} ${req.uri.href}`);
+				error.code = 'VALIDATION_ERROR';
+				error.errors = body.errors;
+				throw error;
+			}
+
+			throw new Error(
+				`Unexpected status code ${statusCode} from create or update channel id:${data.id}`
+			);
+		});
 }
