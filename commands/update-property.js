@@ -12,7 +12,6 @@ const toJsonApiResource = lib.toJsonApiResource;
 const listJsonDirectory = lib.listJsonDirectory;
 const recurseJsonDirectory = lib.recurseJsonDirectory;
 const readJsonFile = lib.readJsonFile;
-const slugify = lib.slugify;
 
 // Params:
 // - app: The Application Object
@@ -124,9 +123,6 @@ exports.main = function updateProperty(app, args) {
 
 			return readJsonFile(files[0])
 				.then(resource => {
-					// Set the ID
-					resource.id = slugify(resource.title);
-
 					// Add the relationships.
 					const relationships = resource.relationships || {};
 					relationships.account = {id: account.id, type: 'account'};
