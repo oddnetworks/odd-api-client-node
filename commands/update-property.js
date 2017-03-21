@@ -6,6 +6,7 @@ const Filepath = require('filepath');
 const lib = require('../lib/');
 const HttpClient = require('../lib/http-client');
 const loginUser = require('../lib/login-user');
+const transformResource = require('../lib/transform-resource');
 const createOrUpdateResource = require('../lib/create-or-update-resource');
 
 const toJsonApiResource = lib.toJsonApiResource;
@@ -175,39 +176,7 @@ exports.main = function updateProperty(app, args) {
 			function updateResource(file) {
 				log.info(`Reading file ${file}`);
 				return readJsonFile(file).then(resource => {
-					delete resource.channel;
-					const relationships = resource.relationships;
-
-					if (resource.type === 'view' && relationships) {
-						// API service view objects don't have relationships like Oddworks objects
-						delete resource.relationships;
-
-						resource.content = Object.keys(relationships).reduce((content, key) => {
-							const data = relationships[key].data;
-							content[key] = Array.isArray(data) ? data : [data];
-							return content;
-						}, {});
-					} else if (resource.type === 'collection' && relationships) {
-						// API service collection objects don't have relationships like Oddworks objects
-						delete resource.relationships;
-
-						resource.children = Object.keys(relationships).reduce((content, key) => {
-							const data = relationships[key].data;
-							content[key] = Array.isArray(data) ? data : [data];
-							return content;
-						}, {});
-					} else if (resource.type === 'platform') {
-						if (resource.platformType) {
-							resource.title = resource.platformType;
-						}
-						resource.id = `${channel.id}-${resource.title}-${resource.category}`.toLowerCase();
-					}
-
-					if (resource.relationships) {
-						resource.relationships.channel = {data: {id: channel.id, type: 'channel'}};
-					} else {
-						resource.channel = channel.id;
-					}
+					resource = transformResource(channel.id, resource);
 
 					return createOrUpdateResource(client, channel.id, resource)
 						.then(data => {
@@ -230,7 +199,14 @@ function setupUser(log, client, userData) {
 	const password = userData.password;
 
 	return loginUser(client, {username, password}).then(res => {
-		if (res === 'NOT_FOUND') {
+		if (_.isObject(res) && res.type === 'login') {
+			log.info(`user ${username} already created`);
+			return res;
+		}
+
+		throw new Error(`Unexpected login response: ${res}`);
+	}).catch(err => {
+		if (/^No user for username/.test(err.detail)) {
 			log.info(`creating user ${username} for the first time`);
 
 			return createOrUpdateResource(client, null, userData).then(() => {
@@ -239,12 +215,7 @@ function setupUser(log, client, userData) {
 			});
 		}
 
-		if (_.isObject(res) && res.type === 'login') {
-			log.info(`user ${username} already created`);
-			return res;
-		}
-
-		throw new Error(`Unexpected login response: ${res}`);
+		throw new Error(`Unexpected user login error: "${err.detail}"`);
 	});
 }
 
