@@ -188,7 +188,8 @@ exports.main = function updateProperty(app, args) {
 			function updateResource(file) {
 				log.info(`Reading file ${file}`);
 				return readJsonFile(file).then(resource => {
-					if (!resource.id) {
+					// The transformResource() function generates an ID for platforms, but not others.
+					if (resource.type !== 'platform' && !resource.id) {
 						throw new Error(`A ${_.startCase(resource.type || 'Unknown Type')} resource must have an .id (${file})`);
 					}
 
