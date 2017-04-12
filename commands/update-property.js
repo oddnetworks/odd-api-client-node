@@ -94,6 +94,10 @@ exports.main = function updateProperty(app, args) {
 
 			return readJsonFile(files[0])
 				.then(resource => {
+					if (!resource.id) {
+						throw new Error(`An Account resource must have an .id (${files[0]})`);
+					}
+
 					return createOrUpdateResource(client, null, resource);
 				})
 				.then(data => {
@@ -124,6 +128,10 @@ exports.main = function updateProperty(app, args) {
 
 			return readJsonFile(files[0])
 				.then(resource => {
+					if (!resource.id) {
+						throw new Error(`A Channel resource must have an .id (${files[0]})`);
+					}
+
 					// Add the relationships.
 					const relationships = resource.relationships || {};
 					relationships.account = {id: account.id, type: 'account'};
@@ -153,6 +161,10 @@ exports.main = function updateProperty(app, args) {
 			return listJsonDirectory(dir).reduce((promise, file) => {
 				return promise.then(() => {
 					return readJsonFile(file).then(resource => {
+						if (!resource.id) {
+							throw new Error(`A Job resource must have an .id (${file})`);
+						}
+
 						return createOrUpdateResource(client, channel.id, resource)
 							.catch(maybeValidationError(file));
 					});
@@ -176,6 +188,10 @@ exports.main = function updateProperty(app, args) {
 			function updateResource(file) {
 				log.info(`Reading file ${file}`);
 				return readJsonFile(file).then(resource => {
+					if (!resource.id) {
+						throw new Error(`A ${_.startCase(resource.type || 'Unknown Type')} resource must have an .id (${file})`);
+					}
+
 					resource = transformResource(channel.id, resource);
 
 					return createOrUpdateResource(client, channel.id, resource)
