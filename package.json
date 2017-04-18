@@ -1,6 +1,6 @@
 {
   "name": "odd-api-client-node",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "An Odd Networks API client in Node.js",
   "author": "Odd Networks, Inc.",
   "license": "Apache-2.0",
