@@ -90,7 +90,7 @@ The `--source` directory must be in a specific format:
     `- view/
 ```
 
-Check out the [example files](./tree/master/examples/example-property-files) to see how to structure your data files. Note that every file requires an "id" attribute, except the `platform` files.
+Check out the [example files](examples/example-property-files) to see how to structure your data files. Note that every file requires an "id" attribute, except the `platform` files.
 
 `odd-cli update-property` will first create the user if it does not already exist, and then login the user. Secondly it will create or update the account and channel objects. Lastly it will recurse through the `content/` directory and create or update all objects it finds there represented as JSON files.
 
