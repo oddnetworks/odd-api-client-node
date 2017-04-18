@@ -41,7 +41,7 @@ Get help any time with
 odd-cli --help
 ```
 
-### api-token
+#### api-token
 Get help with
 
 ```
@@ -50,7 +50,7 @@ odd-cli api-token --help
 
 Generate an API JWT token for a user with `--username` and `--password`.
 
-### load
+#### load
 Get help with
 
 ```
