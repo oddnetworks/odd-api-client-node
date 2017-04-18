@@ -1,0 +1,8 @@
+{
+	"type": "provider",
+	"id": "odd-networks-test-vimeo-provider",
+	"sourceName": "vimeo",
+	"secrets": {
+		"accessToken": ""
+	}
+}

@@ -1,0 +1,10 @@
+{
+	"type": "provider",
+	"id": "odd-networks-test-livestream-provider",
+	"sourceName": "livestream",
+	"secrets": {
+		"apiKey": "",
+		"accountId": "",
+		"clientId": ""
+	}
+}

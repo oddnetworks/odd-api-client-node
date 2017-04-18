@@ -1,0 +1,11 @@
+{
+  "type": "platform",
+  "platformType": "WEB",
+  "category": "WEB",
+  "active": true,
+  "features": {
+  },
+  "views": {
+    "homepage": "odd-networks-test-homepage"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "odd-networks-test-homepage",
+  "type": "view",
+  "title": "Homepage",
+  "dashboard": [
+    {
+      "key": "featured",
+      "label": "Featured",
+      "editable": true
+    },
+    {
+      "key": "main",
+      "label": "Main",
+      "editable": true
+    }
+  ],
+  "relationships": {
+    "featured": {
+      "data": []
+    },
+    "main": {
+      "data": []
+    }
+  }
+}

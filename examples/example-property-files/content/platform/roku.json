@@ -1,0 +1,11 @@
+{
+  "type": "platform",
+  "platformType": "Roku",
+  "category": "TV",
+  "active": true,
+  "features": {
+  },
+  "views": {
+    "homepage": "odd-networks-test-homepage"
+  }
+}

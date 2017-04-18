@@ -1,0 +1,20 @@
+{
+	"type": "channel",
+	"active": true,
+	"title": "Odd Networks Test",
+	"secrets": {
+		"oddworks": {
+			"baseUrl": "https://content.oddworks.io/v2",
+			"jwt": ""
+		}
+	},
+	"display": {
+		"colors": [],
+		"fonts": [],
+		"images": [
+		]
+	},
+	"config": {
+		"menuBlacklist": []
+	}
+}
