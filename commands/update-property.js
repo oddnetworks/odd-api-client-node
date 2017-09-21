@@ -232,7 +232,7 @@ function setupUser(log, client, userData) {
 			});
 		}
 
-		throw new Error(`Unexpected user login error: "${err.detail}"`);
+		throw new Error(`Unexpected user login error: "${err.detail || err.message}"`);
 	});
 }
 
